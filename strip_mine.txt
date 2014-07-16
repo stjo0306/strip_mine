@@ -1,0 +1,167 @@
+-- arbitrarily chose right to be a positive cardinal_direction move
+x_directions = {0, 1, 0, -1}
+y_directions = {1, 0, -1, 0}
+X = 1
+Y = 2
+Z = 3
+cardinal_direction = 0
+coordinates = {0, 0, 0}
+last_dig_coordinate = {0, 0, 0}
+last_cardinal_direction = 0
+
+function my_abs(int)
+  if int < 0 then
+    int = int * -1
+  end
+  return int
+end
+
+function wait()
+  for i=1, 16, 1 do
+    -- i am considering this a no-op
+    turtle.select(i % 16)
+  end
+end
+
+function wait_for_fuel()
+  ready = "no"
+  while not (ready == "ready") or (ready == "exit") do
+    print("Out of fuel!!!  Please as much fuel as you want to my inventory")
+    print("  and I will refuel myself!")
+    print(*** NOTE I will consume all fuel in my inventory ***")
+    print("Type 'ready' when ready or")
+    print("  type 'exit' to stop strip mining.")
+    ready = io.read()
+  end
+  if ready == "ready" then
+    for i=1, 16, 1 do
+      turtle.select(i)
+      turtle.refuel()
+    end
+    return true;
+  elseif ready == "exit" then
+    return false
+  else
+    print("something has gone horribly wrong!")
+    return false
+  end
+end
+
+function distance_to_origin()
+  distance = 0
+  for i=1, 3, 1 do
+    distance = distance + my_abs(coordinates[i])
+  end
+  return distance
+end
+
+function fuel_level_ok(distance)
+  if distance < turtle.getFuelLevel() then
+    return true
+  end
+  return false
+end
+
+function turn_to_cardinal_direction(direction)
+  if direction > 4 or direction < 0 then
+    return
+  end
+  while not cardinal_direcition == direction do
+    turtle.turnRight()
+    cardinal_direction = (cardinal_direction + 1) % 4
+  end
+end
+
+-- returns the distance to origin
+function move(direction)
+  if direction == "forward" then
+    turtle.dig()
+    wait()
+    while not turtle.forward() do
+      turtle.dig()
+      wait()
+    end
+    coordinates[X] = coordinates[X] + x_directions[cardinal_direction]
+    coordinates[Y] = coordinates[Y] + y_directions[cardinal_direction]
+  elseif direction == "turnRight" then
+    turtle.turnRight()
+    cardinal_direction = (cardinal_direction + 1) % 4
+  elseif direction == "turnLeft" then
+    turtle.turnLeft()
+    cardinal_direction = (cardinal_direction + 3) % 4
+  elseif direction == "up" then
+    turtle.digUp()
+    wait()
+    while not turtle.up() do
+      turtle.digUp()
+      wait()
+    end
+    coordinates[Z] = coordinates[Z] + 1
+  elseif direction == "down" then
+    turtle.digDown()
+    if not turtle.down() then
+      return -1
+    end
+    coordinates[Z] = coordinates[Z] - 1
+  else
+    print("not a registered motion")
+    return -1
+  end
+  return distance_to_start_position()
+end
+
+function go_to_zero_zero()
+  -- go to the x axis
+  if coordinate[Y] < 0 then
+    turn_to_cardinal_direction(0)
+  elseif coordinate[Y] > 0 then
+  end
+  while not coordinate[X] == 0 do
+    move("forward")
+  end
+  -- go to the y axis
+  if coordinate[X] < 0 then
+    turn_to_cardinal_direction(1)
+  elseif coordinate[X] > 0 then
+    turn_to_cardinal_direction(3)
+  end
+  while not coordinate[Y] == 0 do
+    move("forward")
+  end
+end
+
+function go_to_origin()
+  go_to_zero_zero()
+  if coordinate[Z] > 0 then
+    while not coordinate[Z] == 0 do
+      move("down")
+    end
+  elseif coodrinate[Z] < 0 then
+    while not coordinate[Z] == 0 do
+      move("up")
+    end
+  end
+  print("At origin")
+end
+
+function go_get_fuel()
+  -- store the current position and heading
+  last_cardinal_direction = cardinal_direction
+  last_dig_coordinate = coordinate
+  go_to_origin()
+  return wait_for_fuel()
+end
+
+function goto_level(level)
+  while not move("down") == -1 do
+  end
+  for i=1, my_abs(level), 1 do
+    move("up")
+  end
+end
+
+function strip_mine(level)
+  
+end
+
+
